@@ -9,4 +9,4 @@ cosas pendientes a corto plazo
 * habilitación de botones de semillas cuando el contador de soles tiene cantidad suficiente
 * descontar contador de soles al plantar una planta
 * que las platas ejecuten su función después del tiempo estipulado para su función
-* 
+* cambiar el uso de Windows por views para poder soportar distintas pantalla 
