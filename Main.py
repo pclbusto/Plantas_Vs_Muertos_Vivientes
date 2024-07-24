@@ -47,7 +47,7 @@ class PlantaVsNoMuertos(arcade.Window):
 
         # Variables that will hold sprite lists
         self.player_list = None
-        self.coin_list = None
+        self.cuadricula = None
         self.button_list = None
 
         # Set up the player info
@@ -79,23 +79,27 @@ class PlantaVsNoMuertos(arcade.Window):
         self.plant_list = arcade.SpriteList()
         # self.zombies_list = arcade.SpriteList()
         self.button_list = arcade.SpriteList()
-
+        self.cuadricula = arcade.SpriteList()
         # Set up the player
         self.score = 0
-        # self.player_sprite = arcade.Sprite(":resources:images/animated_characters/female_person/femalePerson_idle.png",
-        #                                    PLAYER_SCALING)
-        # self.player_sprite.center_x = 50
-        # self.player_sprite.center_y = 50
-        # self.player_list.append(self.player_sprite)
         seed = BotonPeashooterSeed()
         sun = BotonSunflowerSeed()
 
         self.administrar_lista_botones(seed)
         self.administrar_lista_botones(sun)
 
+        for x in range(1,9):
+            for y in range (1,5):
+                cuadro = arcade.SpriteSolidColor(40,40,(10,10,10))
+               # cuadro = BotonSunflowerSeed()
+                cuadro.center_x = 40*x
+                cuadro.center_y = 40*y
+                print(cuadro.position)
+                self.cuadricula.append(cuadro)
+
     def administrar_lista_botones(self, boton):
         '''
-        chequea cuantos botonoes estan cargados para poder calcular la pos del nuevo boton
+        chequea cuantos botones estan cargados para poder calcular la pos del nuevo boton
         asumiendo que todo los botones de semillas tienen el mismo tamanio
         '''
         pos_y = self.height - boton.height-(boton.height*len(self.button_list))
@@ -131,19 +135,14 @@ class PlantaVsNoMuertos(arcade.Window):
         self.button_list.draw()
         self.recuadro.draw()
         self.plant_list.draw()
-
+        self.cuadricula.draw()
         # Render the text
         arcade.draw_text(f"Score: {self.score}", 10, 20, arcade.color.WHITE, 14)
 
 
     def on_mouse_motion(self, x: float, y: float, dx: float, dy: float):
         boton_aux = None
-
-        if self.estado == "boton_clickeado":
-            self.aux.center_x = x
-            self.aux.center_y = y
-
-        elif self.estado == "nada":
+        if self.estado == "nada":
 
             for boton in self.button_list:
                 if boton.esta_mouse_arriba(x=x, y=y):
@@ -154,8 +153,6 @@ class PlantaVsNoMuertos(arcade.Window):
                 self.recuadro.visible = True
             else:
                 self.recuadro.visible = False
-
-
 
     def on_mouse_press(self, x: float, y: float, button: int, modifiers: int):
         '''
@@ -171,6 +168,16 @@ class PlantaVsNoMuertos(arcade.Window):
             self.plant_list.append(self.aux)
             self.estado = "boton_clickeado"
 
+    def on_mouse_drag(self, x: int, y: int, dx: int, dy: int, buttons: int, modifiers: int):
+        if self.estado == "boton_clickeado":
+            self.aux.center_x = x
+            self.aux.center_y = y
+
+        return super().on_mouse_drag(x, y, dx, dy, buttons, modifiers)
+        
+    def on_mouse_release(self, x: int, y: int, button: int, modifiers: int):
+
+        return super().on_mouse_release(x, y, button, modifiers)
 
     def on_update(self, delta_time):
         """ Movement and game logic """
