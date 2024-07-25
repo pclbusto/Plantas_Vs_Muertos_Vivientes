@@ -14,13 +14,19 @@ class BotonGenerico(arcade.Sprite):
     def __init__(self, filename=None):
         super().__init__(filename=filename)
         self.scale = 0.25
-        self.cadencia = 100
+        self.cadencia_limite = 10000
+        self.cadencia = 0
         self.contador = 0
-        self.danio = 5
         self.costo = 4
+        self.contador_activo = False
 
     def on_click(self):
         pass
+
+    def iniciar_temporizador(self):
+        self.alpha = 50
+        self.contador_activo = True
+        self.contador = 0
 
     def esta_mouse_arriba(self, x: float, y: float):
         if self.collides_with_point((x,y)):
@@ -28,19 +34,23 @@ class BotonGenerico(arcade.Sprite):
         else:
             return False
 
+    def update(self):
+        if self.contador_activo:
+            print(self.cadencia_limite, self.contador)
+            if self.contador <= self.cadencia_limite - self.cadencia:
+                self.contador += self.cadencia
+                self.alpha = 255 *(self.contador/self.cadencia_limite)
+
+
+
 class BotonPeashooterSeed(BotonGenerico):
     def __init__(self):
         super().__init__(filename="imagenes/botones/PeashooterSeed-b.png")
         self.scale = 0.25
-        self.cadencia = 100
+        self.cadencia = 10
         self.contador = 0
         self.danio = 5
         self.costo = 4
-
-
-    def update(self):
-        if self.contador < self.cadencia:
-            self.contador += 1
 
     def on_click(self):
         return Plantas.PeaShooter()
@@ -49,14 +59,12 @@ class BotonSunflowerSeed(BotonGenerico):
     def __init__(self):
         super().__init__(filename="imagenes/botones/SunflowerSeed-b.png")
         self.scale = 0.25
-        self.cadencia = 80
+        self.cadencia = 20
         self.contador = 0
         self.danio = 0
         self.costo = 2
 
-    def update(self):
-        if self.contador < self.cadencia:
-            self.contador += 1
+
 
     def on_click(self):
         return Plantas.SunFlower()

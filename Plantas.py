@@ -15,3 +15,12 @@ class PeaShooter(Planta):
     def __init__(self):
         super().__init__(filename="imagenes/plantas/Peashooter.png")
 
+class Pea(Planta):
+    def __init__(self):
+        super().__init__(filename="imagenes/plantas/Pea.png")
+        self.change_x = 4
+        self.alpha = 255
+    def update(self):
+        self.center_x += self.change_x
+        print("Hello")
+

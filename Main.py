@@ -10,7 +10,10 @@ Debe gestionar las diferentes ventas que tiene el juego.
 import random
 import arcade
 import os
+
+import Plantas
 from Botones import *
+from enum import Enum
 
 PLAYER_SCALING = 1
 COIN_SCALING = 0.25
@@ -19,6 +22,11 @@ SCREEN_WIDTH = 1400
 SCREEN_HEIGHT = 600
 SCREEN_TITLE = "Plantas vs Muertos Vivientes"
 
+
+
+class Estado(Enum):
+    NADA = 0
+    BTN_CLICKEADO = 1
 
 
 class PlantaVsNoMuertos(arcade.Window):
@@ -49,14 +57,12 @@ class PlantaVsNoMuertos(arcade.Window):
         self.player_list = None
         self.cuadricula = None
         self.button_list = None
-
+        self.lista_ocupados = None
+        self.boton_clickeado = None
         # Set up the player info
         self.player_sprite = None
         self.score = 0
         self.score_text = None
-
-        # Don't show the mouse cursor
-        self.set_mouse_visible(True)
 
         # Set the background color
         arcade.set_background_color(arcade.color.AMAZON)
@@ -78,24 +84,27 @@ class PlantaVsNoMuertos(arcade.Window):
         # Sprite lists
         self.plant_list = arcade.SpriteList()
         # self.zombies_list = arcade.SpriteList()
+        self.lista_ocupados = arcade.SpriteList()
         self.button_list = arcade.SpriteList()
         self.cuadricula = arcade.SpriteList()
+        self.cuadricula.visible = False
         # Set up the player
         self.score = 0
         seed = BotonPeashooterSeed()
         sun = BotonSunflowerSeed()
+        self.pea = Plantas.Pea()
+        self.pea.center_y =300
 
         self.administrar_lista_botones(seed)
         self.administrar_lista_botones(sun)
 
-        for x in range(1,9):
-            for y in range (1,5):
-                cuadro = arcade.SpriteSolidColor(40,40,(10,10,10))
-               # cuadro = BotonSunflowerSeed()
-                cuadro.center_x = 40*x
-                cuadro.center_y = 40*y
-                print(cuadro.position)
-                self.cuadricula.append(cuadro)
+        for x in range(0,9):
+            for y in range (0,5):
+                self.cuadricula.append(arcade.SpriteSolidColor(76, 92, (10, 10, 10,200)))
+                self.cuadricula[len(self.cuadricula)-1].left = 80*x+257
+                self.cuadricula[len(self.cuadricula)-1].top = 94*y+130
+                print(self.cuadricula[len(self.cuadricula)-1].position)
+
 
     def administrar_lista_botones(self, boton):
         '''
@@ -111,7 +120,7 @@ class PlantaVsNoMuertos(arcade.Window):
         self.recuadro.visible = False
         self.recuadro.scale = 0.25
         self.aux = None
-        self.estado = "nada"
+        self.estado = Estado.NADA
 
     def on_draw(self):
         """
@@ -136,13 +145,14 @@ class PlantaVsNoMuertos(arcade.Window):
         self.recuadro.draw()
         self.plant_list.draw()
         self.cuadricula.draw()
+        self.pea.draw()
         # Render the text
         arcade.draw_text(f"Score: {self.score}", 10, 20, arcade.color.WHITE, 14)
 
 
     def on_mouse_motion(self, x: float, y: float, dx: float, dy: float):
         boton_aux = None
-        if self.estado == "nada":
+        if self.estado == Estado.NADA:
 
             for boton in self.button_list:
                 if boton.esta_mouse_arriba(x=x, y=y):
@@ -162,14 +172,14 @@ class PlantaVsNoMuertos(arcade.Window):
         boton_aux = None
         for boton in self.button_list:
             if boton.esta_mouse_arriba(x=x, y=y):
-                boton_aux = boton
-        if boton_aux:
-            self.aux = boton_aux.on_click()
-            self.plant_list.append(self.aux)
-            self.estado = "boton_clickeado"
+                self.aux = boton.on_click()
+                self.plant_list.append(self.aux)
+                self.estado = Estado.BTN_CLICKEADO
+                self.boton_clickeado = boton
+
 
     def on_mouse_drag(self, x: int, y: int, dx: int, dy: int, buttons: int, modifiers: int):
-        if self.estado == "boton_clickeado":
+        if self.estado == Estado.BTN_CLICKEADO:
             self.aux.center_x = x
             self.aux.center_y = y
 
@@ -177,6 +187,21 @@ class PlantaVsNoMuertos(arcade.Window):
         
     def on_mouse_release(self, x: int, y: int, button: int, modifiers: int):
 
+        if self.estado == Estado.BTN_CLICKEADO:
+            '''tenemos un sprite creado que hay que soltar. detectamos con que hacemos colision y lo soltamos en el 
+            centro del rectangulo que haga colision'''
+            lista_colision = arcade.get_sprites_at_point((x,y), self.cuadricula)
+            if lista_colision and lista_colision[0] not in self.lista_ocupados:
+                self.lista_ocupados.append(lista_colision[0])
+                self.aux.center_x = lista_colision[0].center_x
+                self.aux.center_y = lista_colision[0].center_y
+                self.aux.alpha = 255
+                self.boton_clickeado.iniciar_temporizador()
+            else:
+                self.plant_list.pop()
+                self.aux = None
+
+            self.estado = Estado.NADA
         return super().on_mouse_release(x, y, button, modifiers)
 
     def on_update(self, delta_time):
@@ -184,8 +209,10 @@ class PlantaVsNoMuertos(arcade.Window):
 
         # Call update on the coin sprites (The sprites don't do much in this
         # example though.)
-        pass
-
+        self.button_list.update()
+        if self.boton_clickeado:
+            self.boton_clickeado.update()
+        self.pea.update()
 
 def main():
     """ Main function """
