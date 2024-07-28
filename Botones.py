@@ -11,7 +11,7 @@ import Plantas
 
 class BotonGenerico(arcade.Sprite):
 
-    def __init__(self, filename=None):
+    def __init__(self, filename=None, juego=None):
         super().__init__(filename=filename)
         self.scale = 0.25
         self.cadencia_limite = 10000
@@ -19,6 +19,7 @@ class BotonGenerico(arcade.Sprite):
         self.contador = 0
         self.costo = 4
         self.contador_activo = False
+        self.juego = juego
 
     def on_click(self):
         pass
@@ -36,7 +37,6 @@ class BotonGenerico(arcade.Sprite):
 
     def update(self):
         if self.contador_activo:
-            print(self.cadencia_limite, self.contador)
             if self.contador <= self.cadencia_limite - self.cadencia:
                 self.contador += self.cadencia
                 self.alpha = 255 *(self.contador/self.cadencia_limite)
@@ -44,20 +44,21 @@ class BotonGenerico(arcade.Sprite):
 
 
 class BotonPeashooterSeed(BotonGenerico):
-    def __init__(self):
-        super().__init__(filename="imagenes/botones/PeashooterSeed-b.png")
+    def __init__(self, juego=None):
+        super().__init__(filename="imagenes/botones/PeashooterSeed-b.png", juego=juego)
         self.scale = 0.25
         self.cadencia = 10
         self.contador = 0
         self.danio = 5
         self.costo = 4
 
+
     def on_click(self):
         return Plantas.PeaShooter()
 
 class BotonSunflowerSeed(BotonGenerico):
-    def __init__(self):
-        super().__init__(filename="imagenes/botones/SunflowerSeed-b.png")
+    def __init__(self, juego = None):
+        super().__init__(filename="imagenes/botones/SunflowerSeed-b.png", juego=juego)
         self.scale = 0.25
         self.cadencia = 20
         self.contador = 0
@@ -66,7 +67,25 @@ class BotonSunflowerSeed(BotonGenerico):
 
 
 
+
     def on_click(self):
-        return Plantas.SunFlower()
+        print(self.juego)
+        return Plantas.SunFlower(self.juego)
 
 
+class BotonThreepeaterSeed(BotonGenerico):
+    def __init__(self, juego = None):
+        super().__init__(filename="imagenes/botones/ThreepeaterSeed-b.png", juego=juego)
+        self.scale = 0.25
+        self.cadencia = 5
+        self.contador = 0
+        self.danio = 5
+        self.costo = 4
+
+    def on_click(self):
+        return Plantas.Threepeater()
+
+class Cartel_Sol(arcade.Sprite):
+    def __init__(self):
+        super().__init__(filename="imagenes/plantas/SunCounter.png")
+        self.scale = 1

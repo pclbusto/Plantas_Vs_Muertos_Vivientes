@@ -2,7 +2,8 @@
 Vamos a tratar de crear un clon de plantas vs zombies. Vamos a utilizar muchas imagenes incialmente de varios lugares para luego ir reemplazando por re dibujos de los sprites originales. La idea es poder tener un juego lo mas fiel al original. 
 Lo vamos a implementar usando Arcade, una libreria de python. 
 cosas pendientes a corto plazo
-* timer para habilitar botones de semillas
+
+* timer para habilitar botones de semillas ->listo ahora cualquier boton de semilla tiene timer. 
 * tamaño variable del campo
 * soles del entorno
 * contador de soles
