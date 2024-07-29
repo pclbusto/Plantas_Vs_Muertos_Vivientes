@@ -5,48 +5,76 @@ from enum import Enum
 class Planta(arcade.Sprite):
     def __init__(self, filename=None, juego=None):
         super().__init__(filename=filename)
-        self.scale = 0.35
-        self.alpha = 200
+        self.scale = 0.25
         self.timer = 0
         self.juego = juego
+        self.puntos_vida = 0
 
     def accion(self):
         pass
+
+    def update(self):
+        if self.puntos_vida <= 0:
+            self.kill()
+        self.contador -= 1
+        if self.contador == 0:
+            self.accion()
+
+
+    def registrar_danio(self, danio):
+        self.puntos_vida -= danio
 
 class SunFlower(Planta):
     def __init__(self, juego=None):
         super().__init__(filename="imagenes/plantas/Sunflower.png", juego=juego)
         self.timer = 60 * 5
         self.contador = self.timer
+        self.puntos_vida = 60
 
-    def update(self):
-        self.contador -=1
-        if self.contador == 0:
-            self.accion()
-            self.contador = self.timer
+
+
     def accion(self):
         sol = Sun(self, extra_y=self.center_y)
         self.juego.agregar_sol(sol)
-        self.timer
+        self.contador = self.timer
 
-
-class PeaShooter(Planta):
-    def __init__(self, juego=None):
-        super().__init__(filename="imagenes/plantas/Peashooter.png", juego=juego)
 
 class Pea(Planta):
-    def __init__(self, juego=None):
+    def __init__(self, juego, punto=None):
         super().__init__(filename="imagenes/plantas/Pea.png", juego=juego)
         self.change_x = 4
-        self.alpha = 255
+        self.danio = 20
+        if punto:
+            self.center_x = punto[0]
+            self.center_y = punto[1]
+        self.puntos_vida = 300
+
     def update(self):
         self.center_x += self.change_x
+        lista_zombies = self.collides_with_list(self.juego.lista_zombies)
+        if lista_zombies:
+            lista_zombies[0].registrar_danio(self.danio)
+            self.kill()
+        if self.center_x >= self.juego.get_size()[0]-self.width:
+            self.kill()
+
+class PeaShooter(Planta):
+    def __init__(self, juego):
+        super().__init__(filename="imagenes/plantas/Peashooter.png", juego=juego)
+        self.timer = 60 * 5
+        self.contador = self.timer
+
+    def accion(self):
+        pea = Pea(juego=self.juego, punto=(self.center_x, self.center_y+(self.height/5)))
+        self.juego.agregar_objeto(pea)
+        self.contador = self.timer
+
+
 
 class Threepeater(Planta):
     def __init__(self, juego=None):
         super().__init__(filename="imagenes/plantas/Threepeater.png", juego=juego)
         self.change_x = 4
-        self.alpha = 255
     def update(self):
         self.center_x += self.change_x
 

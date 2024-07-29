@@ -14,12 +14,36 @@ import os
 import Plantas
 from Botones import *
 from enum import Enum
+from Zombies import *
 
 PLAYER_SCALING = 1
 SCREEN_WIDTH = 2100
 SCREEN_HEIGHT = 900
 SCREEN_TITLE = "Plantas vs Muertos Vivientes"
 
+
+class Generador_zombies():
+    def __init__(self, padre):
+        self.timer = 60*4 #son milisegundos a 60 fps
+        self.contador = 0
+        self.timer_corriendo = False
+        self.cuadricula = padre.get_cuadricula()
+        self.juego = padre
+
+
+    def update(self):
+        if self.timer_corriendo:
+            self.contador += 1
+            if self.contador == self.timer:
+                self.generar_zombie()
+                self.contador = 0
+
+    def comenzar_timer(self):
+        self.timer_corriendo = True
+    def generar_zombie(self):
+        cuadrado = random.choice(self.cuadricula)
+        zombie = BrownCoatZombie(self.juego, cuadrado)
+        self.juego.agregar_zombie(zombie)
 
 class SunGenerator():
     '''
@@ -90,6 +114,7 @@ class PlantaVsNoMuertos(arcade.Window):
         self.cuadricula = None
         self.button_list = None
         self.lista_ocupados = None
+        self.lista_zombies = None
         self.boton_clickeado = None
         self.lista_soles = None
         self.lista_objetos_emitidos_por_plantas = None
@@ -98,6 +123,8 @@ class PlantaVsNoMuertos(arcade.Window):
         self.score = 0
         self.score_text = None
         self.generador_soles = None
+        self.generador_zombies = None
+
         self.cartel_soles = None
 
         # Set the background color
@@ -112,6 +139,8 @@ class PlantaVsNoMuertos(arcade.Window):
 
         self.lista_soles.append(sol)
 
+    def agregar_zombie(self, zombie):
+        self.lista_zombies.append(zombie)
     def setup(self):
         """ Set up the game and initialize the variables. """
 
@@ -129,7 +158,7 @@ class PlantaVsNoMuertos(arcade.Window):
 
         # Sprite lists
         self.lista_plantas = arcade.SpriteList()
-        # self.zombies_list = arcade.SpriteList()
+        self.lista_zombies = arcade.SpriteList()
         self.lista_ocupados = arcade.SpriteList()
         self.button_list = arcade.SpriteList()
         self.cuadricula = arcade.SpriteList()
@@ -141,8 +170,8 @@ class PlantaVsNoMuertos(arcade.Window):
         seed = BotonPeashooterSeed(self)
         sun = BotonSunflowerSeed(self)
         three = BotonThreepeaterSeed(self)
-        self.pea = Plantas.Pea()
-        self.pea.center_y =300
+        # self.pea = Plantas.Pea()
+        # self.pea.center_y =300
 
 
         self.administrar_lista_botones(seed)
@@ -150,14 +179,14 @@ class PlantaVsNoMuertos(arcade.Window):
         self.administrar_lista_botones(three)
         self.generador_soles = SunGenerator(self)
         self.generador_soles.comenzar_timer()
+        self.generador_zombies = Generador_zombies(self)
+        self.generador_zombies.comenzar_timer()
 
         for x in range(0,9):
             for y in range (0,5):
                 self.cuadricula.append(arcade.SpriteSolidColor(114, 138, (10, 10, 10,200)))
                 self.cuadricula[len(self.cuadricula)-1].left = 118*x+386
                 self.cuadricula[len(self.cuadricula)-1].top = 142*y+195
-
-
 
     def administrar_lista_botones(self, boton):
         '''
@@ -197,13 +226,12 @@ class PlantaVsNoMuertos(arcade.Window):
         self.recuadro.draw()
         self.lista_plantas.draw()
         self.cuadricula.draw()
-        self.pea.draw()
         self.lista_soles.draw()
         self.cartel_soles.draw()
         self.lista_objetos_emitidos_por_plantas.draw()
         # Render the text
         arcade.draw_text(f"{self.score}", self.cartel_soles.center_x, self.cartel_soles.center_y-15, arcade.color.BLACK, 34)
-
+        self.lista_zombies.draw()
 
     def on_mouse_motion(self, x: float, y: float, dx: float, dy: float):
         boton_aux = None
@@ -226,6 +254,7 @@ class PlantaVsNoMuertos(arcade.Window):
         '''
         for boton in self.button_list:
             if boton.esta_mouse_arriba(x=x, y=y):
+                # creo una planta con el click del boton la agregamos a la lista de plantas del juego y seguimos
                 self.aux = boton.on_click()
                 self.lista_plantas.append(self.aux)
                 self.estado = Estado.BTN_CLICKEADO
@@ -257,7 +286,7 @@ class PlantaVsNoMuertos(arcade.Window):
                 self.aux.alpha = 255
                 self.boton_clickeado.iniciar_temporizador()
             else:
-                self.lista_plantas.pop()
+                # self.lista_plantas.pop()
                 self.aux = None
 
             self.estado = Estado.NADA
@@ -269,11 +298,12 @@ class PlantaVsNoMuertos(arcade.Window):
         # Call update on the coin sprites (The sprites don't do much in this
         # example though.)
         self.button_list.update()
-        self.pea.update()
         self.generador_soles.update()
         self.lista_soles.update()
         self.lista_plantas.update()
-
+        self.lista_objetos_emitidos_por_plantas.update()
+        self.generador_zombies.update()
+        self.lista_zombies.update()
 def main():
     """ Main function """
     window = PlantaVsNoMuertos(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)

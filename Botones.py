@@ -54,7 +54,8 @@ class BotonPeashooterSeed(BotonGenerico):
 
 
     def on_click(self):
-        return Plantas.PeaShooter()
+        print("retornamos una planta PeaShooter")
+        return Plantas.PeaShooter(self.juego)
 
 class BotonSunflowerSeed(BotonGenerico):
     def __init__(self, juego = None):
@@ -62,11 +63,7 @@ class BotonSunflowerSeed(BotonGenerico):
         self.scale = 0.25
         self.cadencia = 20
         self.contador = 0
-        self.danio = 0
         self.costo = 2
-
-
-
 
     def on_click(self):
         print(self.juego)
